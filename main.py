@@ -11,13 +11,13 @@ def extrair_informacoes(caminho_arquivo):
     config = ler_arquivo_ini(caminho_arquivo)
     informacoes = []
     
-    campos = ['Empresa', 'Terminal', 'Operador', 'Porta']
-    info_secao = {'Arquivo': caminho_arquivo}
+    campos = ['Empresa', 'Terminal', 'Operador', 'Porta', 'CNPJ', 'IP']  # Adicionado 'CNPJ' e 'IP'
+    info_secao = {}  # Removido 'Arquivo': caminho_arquivo
     for secao in config.sections():
         for campo in campos:
             if config.has_option(secao, campo):
                 info_secao[campo] = config.get(secao, campo)
-        if len(info_secao) > 1:  # Se encontramos pelo menos um campo
+        if len(info_secao) > 0:  # Se encontramos pelo menos um campo
             informacoes.append(info_secao)
     
     return informacoes
