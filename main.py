@@ -7,7 +7,7 @@ def ler_arquivo_ini(caminho_arquivo):
     config.read(caminho_arquivo)
     return config
 
-def extrair_informacoes(caminho_arquivo):
+def extrair_informacoes(caminho_arquivo, nome_subpasta):
     config = ler_arquivo_ini(caminho_arquivo)
     informacoes = []
     
@@ -17,12 +17,12 @@ def extrair_informacoes(caminho_arquivo):
         for campo in campos:
             if config.has_option(secao, campo):
                 info_secao[campo] = config.get(secao, campo)
+        # Verificar se o campo "Operador" existe e, se não, adicionar o nome da subpasta
+        if 'Operador' not in info_secao or not info_secao['Operador']:
+            info_secao['Operador'] = nome_subpasta
+        
         if len(info_secao) > 0:
             informacoes.append(info_secao)
-    
-    # Se o arquivo estiver vazio, adicione uma entrada com o nome do usuário
-    if not informacoes:
-        informacoes.append({'Empresa': 'Nome do Usuário'})
     
     return informacoes
 
@@ -30,10 +30,11 @@ def processar_pastas(diretorios_raiz):
     for pasta_raiz in diretorios_raiz:
         dados = []
         for pasta_atual, _, arquivos in os.walk(pasta_raiz):
+            nome_subpasta = os.path.basename(pasta_atual)
             for arquivo in arquivos:
                 if arquivo.lower().endswith('.ini'):
                     caminho_completo = os.path.join(pasta_atual, arquivo)
-                    dados.extend(extrair_informacoes(caminho_completo))
+                    dados.extend(extrair_informacoes(caminho_completo, nome_subpasta))
         
         # Criar um DataFrame com os dados e remover linhas duplicadas
         df = pd.DataFrame(dados).drop_duplicates()
