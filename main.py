@@ -20,6 +20,10 @@ def extrair_informacoes(caminho_arquivo):
         if len(info_secao) > 0:
             informacoes.append(info_secao)
     
+    # Se o arquivo estiver vazio, adicione uma entrada com o nome do usuário
+    if not informacoes:
+        informacoes.append({'Empresa': 'Nome do Usuário'})
+    
     return informacoes
 
 def processar_pastas(diretorios_raiz):
@@ -31,8 +35,8 @@ def processar_pastas(diretorios_raiz):
                     caminho_completo = os.path.join(pasta_atual, arquivo)
                     dados.extend(extrair_informacoes(caminho_completo))
         
-        # Criar um DataFrame com os dados
-        df = pd.DataFrame(dados)
+        # Criar um DataFrame com os dados e remover linhas duplicadas
+        df = pd.DataFrame(dados).drop_duplicates()
         
         # Salvar em um arquivo Excel com formatação aprimorada
         nome_arquivo_excel = f'dados_ini_{os.path.basename(pasta_raiz)}.xlsx'
@@ -41,8 +45,6 @@ def processar_pastas(diretorios_raiz):
 
 # Exemplo de uso com três diretórios raiz diferentes
 diretorios_raiz = [
-    r'C:\Users\dti.flaviob\Desktop\SegundaEstrutura',
-    r'C:\Users\dti.flaviob\Desktop\Estrutura',
-    r'C:\Users\dti.flaviob\Desktop\Estrutura3'
+    r'C:\Users\flaviob\Desktop\Estrutura',
 ]
 processar_pastas(diretorios_raiz)
