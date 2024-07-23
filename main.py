@@ -3,10 +3,11 @@ import configparser
 import pandas as pd
 import logging
 from datetime import datetime
+import tkinter as tk
+from tkinter import filedialog
 
-# Configurando o logging
 log_filename = datetime.now().strftime('log_%Y-%m-%d_%H-%M-%S.log')
-logging.basicConfig(filename=log_filename, filemode='w', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=log_filename, filemode='w', level=logging.DEBUG, format='%(asctime)s - %(message)s')
 
 def ler_arquivo_ini(caminho_arquivo):
     try:
@@ -28,7 +29,6 @@ def extrair_informacoes(caminho_arquivo, nome_subpasta):
             for campo in campos:
                 if config.has_option(secao, campo):
                     info_secao[campo] = config.get(secao, campo)
-            # Verificar se o campo "Operador" existe e, se não, adicionar o nome da subpasta
             if 'Operador' not in info_secao or not info_secao['Operador']:
                 info_secao['Operador'] = nome_subpasta
             
@@ -50,11 +50,8 @@ def processar_pastas(diretorios_raiz):
                 if arquivo.lower().endswith('.ini'):
                     caminho_completo = os.path.join(pasta_atual, arquivo)
                     dados.extend(extrair_informacoes(caminho_completo, nome_subpasta))
-        
-        # Criar um DataFrame com os dados e remover linhas duplicadas
         df = pd.DataFrame(dados).drop_duplicates()
         
-        # Salvar em um arquivo Excel com formatação aprimorada
         try:
             nome_arquivo_excel = f'dados_ini_{os.path.basename(pasta_raiz)}.xlsx'
             df.to_excel(nome_arquivo_excel, index=False)
@@ -62,8 +59,16 @@ def processar_pastas(diretorios_raiz):
         except Exception as e:
             logging.error(f"Erro ao salvar os dados no arquivo Excel: {nome_arquivo_excel} - {e}")
 
-# Exemplo de uso com um diretório raiz
-diretorios_raiz = [
-    r'C:\Users\flaviob\Desktop\Estrutura',
-]
-processar_pastas(diretorios_raiz)
+def selecionar_diretorio():
+    root = tk.Tk()
+    root.withdraw()  # Esconde a janela principal
+    diretorio_raiz = filedialog.askdirectory(title="Selecione o diretório raiz onde se encontram os arquivos")
+    return diretorio_raiz
+
+# Solicitar ao usuário o diretório raiz
+diretorio_raiz = selecionar_diretorio()
+if diretorio_raiz:
+    diretorios_raiz = [diretorio_raiz]
+    processar_pastas(diretorios_raiz)
+else:
+    logging.error("Nenhum diretório foi selecionado.")
